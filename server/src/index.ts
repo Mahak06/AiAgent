@@ -5,6 +5,8 @@ import { google } from '@ai-sdk/google';
 import dotenv from 'dotenv';
 import cors from 'cors';
 // import { main } from './helper/RAGPrac';
+import { generate_text_ai } from './helper/utils';
+
 dotenv.config();
 
 const app = express();
@@ -29,16 +31,10 @@ router.post('/completion', async (req: Request, res: Response) => {
 
   try {
     console.log('Calling generateText with messages:', messages);
-    const {response} = await generateText({
-      model: google('gemini-1.5-pro'),
-      system: 'You are a helpful assistant who praises the user. Please give answers in 2 lines',
-      messages: messages,
-    });
-    
-    // Extract text content similar to image upload
-    const message = response?.messages?.[0];
-    if (message && message.content) {
-      res.json({ text: message.content });
+
+    const res = await generate_text_ai({system:'You are a helpful assistant who praises the user. Please give answers in 2 lines',messages:messages})
+    if (res) {
+      res.json({ text:res });
     } else {
       res.status(400).json({ error: 'No content found' });
     }
@@ -79,3 +75,9 @@ console.log("GOOGLE_GENERATIVE_AI_API_KEY:", process.env.GOOGLE_GENERATIVE_AI_AP
 // main()
 //   .then()
 //   .catch(error => console.error('Error in RAG processing:', error));
+
+
+// Created this wrapper to simplify the usage
+generate_text_ai({system:"You are a agent that tells a harsh truth about reality ",messages:undefined,prompt:"Tell me a joke please"}).then(res=>{
+  console.log(res)
+})
